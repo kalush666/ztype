@@ -20,6 +20,7 @@ let score = 0;
 let level = 1;
 let spawnInterval = 2000;
 let spawnTimer = null;
+let gameOver = false;
 
 async function fetchWords() {
   try {
@@ -41,7 +42,7 @@ function spawnEnemy() {
   }
 
   const maxLength = Math.min(level * 2, 15);
-  const minLength = Math.max(Math.floor(level / 2 + 1), 3);
+  const minLength = Math.max(Math.floor(level / 2), 3);
 
   const adjustedMaxLength = Math.max(maxLength, minLength);
 
@@ -84,6 +85,8 @@ function createExplosion(x, y, word) {
 }
 
 function updateGame() {
+  if (gameOver) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = explosions.length - 1; i >= 0; i--) {
@@ -94,14 +97,26 @@ function updateGame() {
     }
   }
 
+  let gameOverTriggered = false;
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     enemy.update();
     enemy.draw(ctx);
 
+    if (enemy.y >= canvas.height) {
+      gameOverTriggered = true;
+    }
+
     if (enemy.y > canvas.height + 20) {
       enemies.splice(i, 1);
     }
+  }
+
+  if (gameOverTriggered) {
+    gameOver = true;
+    clearInterval(spawnTimer);
+    spawnTimer = null;
+    showGameOver();
   }
 
   ctx.fillStyle = "white";
@@ -110,12 +125,32 @@ function updateGame() {
   ctx.fillText(`Level: ${level}`, 20, 70);
 }
 
-function gameLoop() {
-  updateGame();
-  requestAnimationFrame(gameLoop);
+function showGameOver() {
+  const gameOverScreen = document.getElementById("gameOverScreen");
+  document.getElementById("finalScore").textContent = score;
+  gameOverScreen.style.display = "block";
 }
 
+function restartGame() {
+  gameOver = false;
+  enemies = [];
+  explosions = [];
+  score = 0;
+  level = 1;
+  spawnInterval = 2000;
+
+  if (spawnTimer) clearInterval(spawnTimer);
+  spawnTimer = setInterval(spawnEnemy, spawnInterval);
+
+  document.getElementById("gameOverScreen").style.display = "none";
+  gameLoop();
+}
+
+document.getElementById("restartButton").addEventListener("click", restartGame);
+
 document.addEventListener("keydown", (e) => {
+  if (gameOver) return;
+
   const result = handleKeyPress(e, enemies);
   if (result.completed) {
     const completedEnemy = enemies[result.index];
@@ -125,6 +160,12 @@ document.addEventListener("keydown", (e) => {
     adjustDifficulty();
   }
 });
+
+function gameLoop() {
+  if (gameOver) return;
+  updateGame();
+  requestAnimationFrame(gameLoop);
+}
 
 fetchWords().then(() => {
   spawnTimer = setInterval(spawnEnemy, spawnInterval);
