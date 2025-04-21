@@ -1,37 +1,12 @@
+import { Enemy } from "./js/enemy.js";
+import { hundleKeyPress } from "./js/input.js";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let words = [];
 let enemies = [];
 let inputBuffer = "";
-
-class Enemy {
-  constructor(word, x, y) {
-    this.word = word;
-    this.x = x;
-    this.y = y;
-    this.currentIndex = 0;
-  }
-
-  draw() {
-    ctx.fillStyle = "black";
-    ctx.font = "24px monospace";
-    ctx.fillText(this, word, this.x, this.y);
-  }
-
-  update() {
-    this.y += 0.5;
-  }
-
-  isTypedCorrectly(letter) {
-    return this.word[this.currentIndex] === letter;
-  }
-
-  progressTyping() {
-    this.currentIndex++;
-    return this.currentIndex === this.word.length;
-  }
-}
 
 async function fetchWords() {
   try {
@@ -69,6 +44,10 @@ function gameLoop() {
   updateGame();
   requestAnimationFrame(gameLoop);
 }
+
+document.addEventListener("keydown", (event) => {
+  hundleKeyPress(event, enemies);
+});
 
 fetchWords().then(() => {
   setInterval(spawnEnemy, 2000);
