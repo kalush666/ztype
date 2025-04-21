@@ -4,7 +4,7 @@ export class Enemy {
     this.x = x;
     this.y = y;
     this.progress = 0;
-    this.speed = Math.max(0.5, 1.5 - word.length * 0.05);
+    this.speed = Math.max(0.8, 1.8 - word.length * 0.05);
   }
 
   update() {

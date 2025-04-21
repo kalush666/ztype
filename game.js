@@ -17,6 +17,9 @@ let enemies = [];
 let explosions = [];
 let inputBuffer = "";
 let score = 0;
+let level = 1;
+let spawnInterval = 2000;
+let spawnTimer = null;
 
 async function fetchWords() {
   try {
@@ -36,10 +39,44 @@ function spawnEnemy() {
     console.error("No words available to spawn enemies.");
     return;
   }
-  const randomWord = words[Math.floor(Math.random() * words.length)];
+
+  const maxLength = Math.min(level * 2, 15);
+  const minLength = Math.max(Math.floor(level / 2), 3);
+
+  const adjustedMaxLength = Math.max(maxLength, minLength);
+
+  let wordPool = words.filter((word) => {
+    return word.length >= minLength && word.length <= adjustedMaxLength;
+  });
+
+  if (wordPool.length === 0) {
+    wordPool = words;
+  }
+
+  const randomWord = wordPool[Math.floor(Math.random() * wordPool.length)];
   const x = Math.random() * (canvas.width - 150);
   const y = -30;
   enemies.push(new Enemy(randomWord, x, y));
+
+  adjustDifficulty();
+}
+
+function adjustDifficulty() {
+  level = 1 + Math.floor(score / 500);
+
+  const baseInterval = 2500;
+  const levelFactor = Math.max(0.6, 1 - level * 0.06);
+  const enemyCountFactor = Math.min(1.5, 1 + enemies.length * 0.1);
+
+  const newInterval = baseInterval * levelFactor * enemyCountFactor;
+
+  if (Math.abs(newInterval - spawnInterval) > 200) {
+    spawnInterval = newInterval;
+    if (spawnTimer) {
+      clearInterval(spawnTimer);
+    }
+    spawnTimer = setInterval(spawnEnemy, spawnInterval);
+  }
 }
 
 function createExplosion(x, y, word) {
@@ -70,6 +107,7 @@ function updateGame() {
   ctx.fillStyle = "white";
   ctx.font = "24px Arial";
   ctx.fillText(`Score: ${score}`, 20, 40);
+  ctx.fillText(`Level: ${level}`, 20, 70);
 }
 
 function gameLoop() {
@@ -84,10 +122,11 @@ document.addEventListener("keydown", (e) => {
     createExplosion(completedEnemy.x, completedEnemy.y, completedEnemy.word);
     enemies.splice(result.index, 1);
     score += completedEnemy.word.length * 10;
+    adjustDifficulty();
   }
 });
 
 fetchWords().then(() => {
-  setInterval(spawnEnemy, 2000);
+  spawnTimer = setInterval(spawnEnemy, spawnInterval);
   gameLoop();
 });
