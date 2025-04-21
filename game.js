@@ -41,7 +41,7 @@ function spawnEnemy() {
   }
 
   const maxLength = Math.min(level * 2, 15);
-  const minLength = Math.max(Math.floor(level / 2), 3);
+  const minLength = Math.max(Math.floor(level / 2 + 1), 3);
 
   const adjustedMaxLength = Math.max(maxLength, minLength);
 
@@ -64,7 +64,7 @@ function spawnEnemy() {
 function adjustDifficulty() {
   level = 1 + Math.floor(score / 500);
 
-  const baseInterval = 2500;
+  const baseInterval = 2000;
   const levelFactor = Math.max(0.6, 1 - level * 0.06);
   const enemyCountFactor = Math.min(1.5, 1 + enemies.length * 0.1);
 
