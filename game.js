@@ -1,5 +1,5 @@
 import { Enemy } from "./js/enemy.js";
-import { hundleKeyPress } from "./js/input.js";
+import { handleKeyPress } from "./js/input.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -36,7 +36,7 @@ function updateGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let enemy of enemies) {
     enemy.update();
-    enemy.draw();
+    enemy.draw(ctx);
   }
 }
 
@@ -45,8 +45,8 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-document.addEventListener("keydown", (event) => {
-  hundleKeyPress(event, enemies);
+document.addEventListener("keydown", (e) => {
+  handleKeyPress(e, enemies);
 });
 
 fetchWords().then(() => {

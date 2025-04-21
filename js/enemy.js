@@ -14,7 +14,6 @@ export class Enemy {
     ctx.fillStyle = "white";
     ctx.font = "24px monospace";
     ctx.fillText(this.word, this.x, this.y);
-    // Highlight typed part
     ctx.fillStyle = "lime";
     ctx.fillText(this.word.slice(0, this.progress), this.x, this.y);
   }
