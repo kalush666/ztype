@@ -147,6 +147,14 @@ function restartGame() {
 }
 
 document.getElementById("restartButton").addEventListener("click", restartGame);
+document.getElementById("startButton").addEventListener("click", () => {
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameCanvas").style.display = "block";
+  fetchWords().then(() => {
+    spawnTimer = setInterval(spawnEnemy, spawnInterval);
+    gameLoop();
+  });
+});
 
 document.addEventListener("keydown", (e) => {
   if (gameOver) return;
@@ -166,8 +174,3 @@ function gameLoop() {
   updateGame();
   requestAnimationFrame(gameLoop);
 }
-
-fetchWords().then(() => {
-  spawnTimer = setInterval(spawnEnemy, spawnInterval);
-  gameLoop();
-});
