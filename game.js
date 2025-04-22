@@ -1,6 +1,7 @@
 import { Enemy } from "./js/enemy.js";
 import { Explosion } from "./js/explosion.js";
 import { handleKeyPress } from "./js/input.js";
+import { Bullet } from "./js/Bullet.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -25,6 +26,7 @@ window.addEventListener("resize", resizeCanvas);
 let words = [];
 let enemies = [];
 let explosions = [];
+let bullets = [];
 let inputBuffer = "";
 let score = 0;
 let level = 1;
@@ -109,6 +111,15 @@ function updateGame() {
     }
   }
 
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    if (bullets[i].update()) {
+      createExplosion(bullets[i].targetX, bullets[i].targetY, "");
+      bullets.splice(i, 1);
+    } else {
+      bullets[i].draw(ctx);
+    }
+  }
+
   let gameOverTriggered = false;
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
@@ -138,7 +149,6 @@ function updateGame() {
 
   drawShip();
 }
-
 function showGameOver() {
   const gameOverScreen = document.getElementById("gameOverScreen");
   document.getElementById("finalScore").textContent = score;
@@ -185,6 +195,7 @@ document.addEventListener("keydown", (e) => {
   const result = handleKeyPress(e, enemies);
   if (result.completed) {
     const completedEnemy = enemies[result.index];
+    bullets.push(new Bullet(shipX, shipY, completedEnemy.x, completedEnemy.y));
     createExplosion(completedEnemy.x, completedEnemy.y, completedEnemy.word);
     enemies.splice(result.index, 1);
     score += completedEnemy.word.length * 10;
