@@ -4,10 +4,20 @@ import { handleKeyPress } from "./js/input.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const shipImage = new Image();
+
+shipImage.src = "assets/images/ship-removebg-preview.png";
+let shipX = canvas.width / 2;
+let shipY = canvas.height - 50;
+let targetX = shipX;
+let targetY = shipY;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+
+  shipX = canvas.width / 2;
+  shipY = canvas.height - 50;
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
@@ -82,6 +92,8 @@ function adjustDifficulty() {
 
 function createExplosion(x, y, word) {
   explosions.push(new Explosion(x, y, word));
+  targetX = x;
+  targetY = y;
 }
 
 function updateGame() {
@@ -123,6 +135,8 @@ function updateGame() {
   ctx.font = "24px Arial";
   ctx.fillText(`Score: ${score}`, 20, 40);
   ctx.fillText(`Level: ${level}`, 20, 70);
+
+  drawShip();
 }
 
 function showGameOver() {
@@ -144,6 +158,15 @@ function restartGame() {
 
   document.getElementById("gameOverScreen").style.display = "none";
   gameLoop();
+}
+
+function drawShip() {
+  const angle = Math.atan2(targetY - shipY, targetX - shipX);
+  ctx.save();
+  ctx.translate(shipX, shipY);
+  ctx.rotate(angle + Math.PI / 2);
+  ctx.drawImage(shipImage, -25, -25, 50, 50);
+  ctx.restore();
 }
 
 document.getElementById("restartButton").addEventListener("click", restartGame);
