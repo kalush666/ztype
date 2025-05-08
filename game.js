@@ -6,6 +6,7 @@ import { Bullet } from "./js/Bullet.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const shipImage = new Image();
+const MAX_HIGH_SCORES = 5;
 
 shipImage.src = "assets/images/ship-removebg-preview.png";
 let shipX = canvas.width / 2;
@@ -23,6 +24,28 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
+function saveHighScore(score) {
+  const highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+  highScores.push(score);
+  highScores.sort((a, b) => b - a);
+  if (highScores.length > MAX_HIGH_SCORES) {
+    highScores.pop();
+  }
+  localStorage.setItem("highScores", JSON.stringify(highScores));
+}
+
+function displayHighScores() {
+  const highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+  const highScoresList = document.getElementById("highScoresList");
+
+  highScoresList.innerHTML = "";
+
+  highScores.forEach((entry) => {
+    const li = document.createElement("li");
+    li.textContent = `${entry.score} - ${entry.date}`;
+    highScoresList.appendChild(li);
+  });
+}
 let words = [];
 let enemies = [];
 let explosions = [];
@@ -120,10 +143,18 @@ function updateGame() {
     }
   }
 
+  let focusedEnemyIndex = -1;
+  if (inputBuffer.length > 0) {
+    focusedEnemyIndex = enemies.findIndex((enemy) =>
+      enemy.word.startsWith(inputBuffer)
+    );
+  }
+
   let gameOverTriggered = false;
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
-    enemy.update();
+    const isFocused = i === focusedEnemyIndex;
+    enemy.update(isFocused);
     enemy.draw(ctx);
 
     if (enemy.y >= canvas.height) {
@@ -189,6 +220,10 @@ document.getElementById("startButton").addEventListener("click", () => {
   });
 });
 
+document.getElementById("scoreboard").addEventListener("click", () => {
+  document.getElementById("highScores").style.display = "block";
+  displayHighScores();
+});
 document.addEventListener("keydown", (e) => {
   if (gameOver) return;
 

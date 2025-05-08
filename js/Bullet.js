@@ -4,7 +4,7 @@ export class Bullet {
     this.y = startY;
     this.targetX = targetX;
     this.targetY = targetY;
-    this.speed = 60;
+    this.speed = 80;
 
     const angle = Math.atan2(targetY - startY, targetX - startX);
     this.vx = Math.cos(angle) * this.speed;

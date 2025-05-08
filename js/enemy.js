@@ -5,9 +5,11 @@ export class Enemy {
     this.y = y;
     this.progress = 0;
     this.speed = Math.max(0.8, 1.8 - word.length * 0.05);
+    this.originalSpeed = this.speed;
   }
 
-  update() {
+  update(isFocused) {
+    this.speed = isFocused ? this.originalSpeed * 0.5 : this.originalSpeed;
     this.y += this.speed;
   }
 
